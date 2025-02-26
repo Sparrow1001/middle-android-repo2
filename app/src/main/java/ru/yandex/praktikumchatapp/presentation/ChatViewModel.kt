@@ -1,5 +1,6 @@
 package ru.yandex.praktikumchatapp.presentation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,10 +21,14 @@ class ChatViewModel(
     init {
         viewModelScope.launch {
             while (isWithReplies) {
-                repository.getReplyMessage().collect { response ->
-                    _messages.update {
-                        it + Message.OtherMessage(response)
+                try {
+                    repository.getReplyMessage().collect { response ->
+                        _messages.update {
+                            it + Message.OtherMessage(response)
+                        }
                     }
+                } catch (e: Exception) {
+                    Log.d(TAG, e.message.toString())
                 }
             }
         }
@@ -33,5 +38,9 @@ class ChatViewModel(
         _messages.update {
             it + Message.MyMessage(messageText)
         }
+    }
+
+    companion object {
+        private const val TAG = "ChatViewModel"
     }
 }
